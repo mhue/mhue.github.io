@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dilemme du prisonnier itéré</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2em;
+      max-width: 600px;
+      margin: auto;
+      background: #f4f4f4;
+    }
+    h1 {
+      text-align: center;
+    }
+    button {
+      font-size: 1.2em;
+      margin: 0.5em;
+      padding: 0.5em 1em;
+    }
+    .historique {
+      margin-top: 2em;
+      border-collapse: collapse;
+      width: 100%;
+    }
+    .historique th, .historique td {
+      border: 1px solid #aaa;
+      padding: 0.5em;
+      text-align: center;
+    }
+    .score {
+      font-size: 1.2em;
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Dilemme du Prisonnier Itéré</h1>
+
+<p>Choisissez votre action :</p>
+<button onclick="jouerUnTour('C')">🤝 Coopérer</button>
+<button onclick="jouerUnTour('D')">⚔️ Trahir</button>
+
+<div class="score" id="tableauScores">Votre score : 0 | Score du bot : 0</div>
+
+<table class="historique" id="tableHistorique">
+  <thead>
+    <tr>
+      <th>Tour</th>
+      <th>Vous</th>
+      <th>Bot</th>
+      <th>Scores (Vous, Bot)</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+  const gain = {
+    'CC': [3, 3],
+    'CD': [0, 5],
+    'DC': [5, 0],
+    'DD': [1, 1]
+  };
+
+  let historique = [];
+  let scoreJoueur = 0;
+  let scoreBot = 0;
+
+  function strategieBot() {
+    if (historique.length === 0) return 'C'; // Tit for Tat commence par coopérer
+    return historique[historique.length - 1].joueur; // Imite le dernier coup du joueur
+  }
+
+  function jouerUnTour(coupJoueur) {
+    const coupBot = strategieBot();
+    const clé = coupJoueur + coupBot;
+    const [ptsJoueur, ptsBot] = gain[clé];
+
+    scoreJoueur += ptsJoueur;
+    scoreBot += ptsBot;
+
+    historique.push({ tour: historique.length + 1, joueur: coupJoueur, bot: coupBot, ptsJoueur, ptsBot });
+
+    mettreAJourInterface();
+  }
+
+  function mettreAJourInterface() {
+    const tableau = document.getElementById("tableHistorique").querySelector("tbody");
+    tableau.innerHTML = "";
+
+    historique.forEach(entree => {
+      const ligne = `<tr>
+        <td>${entree.tour}</td>
+        <td>${entree.joueur}</td>
+        <td>${entree.bot}</td>
+        <td>${entree.ptsJoueur}, ${entree.ptsBot}</td>
+      </tr>`;
+      tableau.innerHTML += ligne;
+    });
+
+    document.getElementById("tableauScores").textContent = `Votre score : ${scoreJoueur} | Score du bot : ${scoreBot}`;
+  }
+</script>
+
+</body>
+</html>
