@@ -1,52 +1,110 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <title>Profils – Jeu des Pommes Magiques</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profils du jeu des pommes 🍎</title>
   <style>
     body {
-      font-family: 'Comic Sans MS', sans-serif;
-      background-color: #fff8e1;
-      max-width: 700px;
-      margin: auto;
+      font-family: sans-serif;
+      background: #fff8e1;
       padding: 2em;
+      max-width: 800px;
+      margin: auto;
     }
     h1 {
       text-align: center;
     }
     .profil {
-      margin-bottom: 1em;
-      padding: 1em;
+      background: #ffffff;
       border-radius: 12px;
-      background: #fefefe;
-      box-shadow: 0 2px 4px #ccc;
+      padding: 1em;
+      margin: 1em 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
-    .profil:nth-child(odd) {
-      background-color: #f3f8ec;
-    }
-    .profil:nth-child(even) {
-      background-color: #ffe8e8;
-    }
-    .profil strong {
+    .profil h2 {
+      margin-top: 0;
       font-size: 1.2em;
+      color: #4e342e;
+    }
+    .profil p {
+      margin: 0.5em 0;
+      font-size: 1em;
     }
   </style>
 </head>
 <body>
-  <h1>🍎 Les 12 Profils du Jeu des Pommes Magiques 🍏</h1>
 
-  <div class="profil"><strong>1. GENTILLE</strong><br>Je choisis toujours de 🍎 partager les pommes.</div>
-  <div class="profil"><strong>2. MECHANTE</strong><br>Je choisis toujours de 🍏 garder toutes les pommes pour moi.</div>
-  <div class="profil"><strong>3. LUNATIQUE</strong><br>Je choisis au hasard : une fois 🍎 partager, une fois 🍏 garder.</div>
-  <div class="profil"><strong>4. DONNANT-DONNANT</strong><br>Au premier tour je 🍎 partage. Ensuite je fais comme l'autre a fait au tour précédent.</div>
-  <div class="profil"><strong>5. RANCUNIERE</strong><br>Je 🍎 partage… mais dès que l'autre 🍏 garde, je garde toujours ensuite.</div>
-  <div class="profil"><strong>6. PERIODIQUE-MECHANTE</strong><br>Je répète : 🍏 garder, 🍏 garder, 🍎 partager, puis recommence…</div>
-  <div class="profil"><strong>7. PERIODIQUE-GENTILLE</strong><br>Je répète : 🍎 partager, 🍎 partager, 🍏 garder, puis recommence…</div>
-  <div class="profil"><strong>8. MAJORITE-MOU</strong><br>Je fais ce que l'autre a fait le plus souvent. En cas d'égalité, je 🍎 partage.</div>
-  <div class="profil"><strong>9. MEFIANTE</strong><br>Je commence en 🍏 gardant. Ensuite je fais comme l'autre au tour précédent.</div>
-  <div class="profil"><strong>10. MAJORITE-DUR</strong><br>Je fais ce que l'autre a fait le plus souvent. En cas d'égalité, je 🍏 garde.</div>
-  <div class="profil"><strong>11. SONDEUR</strong><br>Je commence : 🍏 garder, 🍎 partager, 🍎 partager. Si l'autre a 🍎 partagé aux deux derniers tours, je 🍏 garde toujours. Sinon je joue comme un DONNANT-DONNANT.</div>
-  <div class="profil"><strong>12. DONNANT-DONNANT-DUR</strong><br>Je 🍎 partage, sauf si l'autre a 🍏 gardé dans un des deux derniers tours. Alors je 🍏 garde aussi.</div>
+<h1>🍎 Les profils du jeu des pommes 🍏</h1>
+
+<div class="profil">
+  <h2>1. GENTILLE</h2>
+  <p>Je choisis <strong>toujours de partager</strong> les pommes. 🍎</p>
+</div>
+
+<div class="profil">
+  <h2>2. MÉCHANTE</h2>
+  <p>Je choisis <strong>toujours de garder</strong> les pommes. 🍏</p>
+</div>
+
+<div class="profil">
+  <h2>3. LUNATIQUE</h2>
+  <p>Je choisis <strong>au hasard</strong> entre partager 🍎 et garder 🍏, à chaque tour.</p>
+</div>
+
+<div class="profil">
+  <h2>4. DONNANT-DONNANT</h2>
+  <p>Je commence par <strong>partager</strong> 🍎, puis je fais <strong>comme toi au tour précédent</strong>.</p>
+</div>
+
+<div class="profil">
+  <h2>5. RANCUNIÈRE</h2>
+  <p>Je <strong>partage</strong> 🍎 jusqu’à ce que tu gardes 🍏 une fois…  
+  Ensuite, je garde à tous les tours. 🍏</p>
+</div>
+
+<div class="profil">
+  <h2>6. PÉRIODIQUE-MÉCHANTE</h2>
+  <p>Je joue en rythme : <strong>garder, garder, partager</strong>, puis je recommence. 🍏🍏🍎…</p>
+</div>
+
+<div class="profil">
+  <h2>7. PÉRIODIQUE-GENTILLE</h2>
+  <p>Je joue en rythme : <strong>partager, partager, garder</strong>, puis je recommence. 🍎🍎🍏…</p>
+</div>
+
+<div class="profil">
+  <h2>8. MAJORITÉ-MOU</h2>
+  <p>Je regarde ce que tu fais le plus souvent.  
+  Si tu partages 🍎 plus souvent, je partage.  
+  S’il y a égalité ou c’est le premier tour, je <strong>partage</strong>.</p>
+</div>
+
+<div class="profil">
+  <h2>9. MÉFIANTE</h2>
+  <p>Je commence par <strong>garder</strong> 🍏, puis je fais <strong>comme toi au tour d’avant</strong>.</p>
+</div>
+
+<div class="profil">
+  <h2>10. MAJORITÉ-DUR</h2>
+  <p>Je regarde ce que tu fais le plus souvent.  
+  Si tu gardes 🍏 plus souvent, je garde aussi.  
+  En cas d’égalité ou au premier tour, je <strong>garde</strong>.</p>
+</div>
+
+<div class="profil">
+  <h2>11. SONDEUR</h2>
+  <p>Je commence par : 🍏 garder, 🍎 partager, 🍎 partager.  
+  Ensuite :  
+  → si tu as partagé aux tours 2 et 3, je <strong>garde toujours</strong> 🍏  
+  → sinon, je joue comme un <strong>DONNANT-DONNANT</strong></p>
+</div>
+
+<div class="profil">
+  <h2>12. DONNANT-DONNANT-DUR</h2>
+  <p>Je <strong>partage</strong> 🍎 sauf si tu as gardé 🍏 à l’un des deux derniers tours.  
+  Dans ce cas, je garde aussi. 🍏</p>
+</div>
 
 </body>
 </html>
