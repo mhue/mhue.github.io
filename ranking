@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classement des Profils 🍎</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f9fbe7;
+      padding: 2em;
+      max-width: 1000px;
+      margin: auto;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 2em 0;
+    }
+    th, td {
+      border: 1px solid #aaa;
+      padding: 0.5em;
+      text-align: center;
+    }
+    .small {
+      font-size: 0.8em;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+<h1>🍏 Comparaison des Profils 🍎</h1>
+<p class="small">Simulation du jeu des pommes sur 20 tours entre chaque paire de profils.</p>
+
+<table id="resultats">
+  <thead>
+    <tr>
+      <th>Profil</th>
+      <th>Score Total</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+const profils = {
+  'GENTILLE': () => 'C',
+  'MÉCHANTE': () => 'D',
+  'LUNATIQUE': () => Math.random() < 0.5 ? 'C' : 'D',
+  'DONNANT-DONNANT': (me, you) => me.length === 0 ? 'C' : you[you.length - 1],
+  'RANCUNIÈRE': (me, you) => you.includes('D') ? 'D' : 'C',
+  'PÉRIODIQUE-MÉCHANTE': (me) => ['D', 'D', 'C'][me.length % 3],
+  'PÉRIODIQUE-GENTILLE': (me) => ['C', 'C', 'D'][me.length % 3],
+  'MAJORITÉ-MOU': (me, you) => {
+    if (you.length === 0) return 'C';
+    const c = you.filter(x => x === 'C').length;
+    const d = you.length - c;
+    return c >= d ? 'C' : 'D';
+  },
+  'MÉFIANTE': (me, you) => me.length === 0 ? 'D' : you[you.length - 1],
+  'MAJORITÉ-DUR': (me, you) => {
+    if (you.length === 0) return 'D';
+    const c = you.filter(x => x === 'C').length;
+    const d = you.length - c;
+    return d >= c ? 'D' : 'C';
+  },
+  'SONDEUR': (me, you) => {
+    const n = me.length;
+    if (n === 0) return 'D';
+    if (n === 1 || n === 2) return 'C';
+    if (you[1] === 'C' && you[2] === 'C') return 'D';
+    return you[n - 1];
+  },
+  'DONNANT-DONNANT-DUR': (me, you) => {
+    const n = you.length;
+    if (n >= 2 && (you[n - 1] === 'D' || you[n - 2] === 'D')) return 'D';
+    return 'C';
+  }
+};
+
+const gain = {
+  'CC': [3, 3],
+  'CD': [0, 5],
+  'DC': [5, 0],
+  'DD': [1, 1]
+};
+
+const profilsNoms = Object.keys(profils);
+const scoresTotaux = {};
+profilsNoms.forEach(n => scoresTotaux[n] = 0);
+
+for (let i = 0; i < profilsNoms.length; i++) {
+  for (let j = 0; j < profilsNoms.length; j++) {
+    let me1 = [], me2 = [], you1 = [], you2 = [];
+    let score1 = 0, score2 = 0;
+    for (let t = 0; t < 20; t++) {
+      const p1 = profils[profilsNoms[i]](me1, you1);
+      const p2 = profils[profilsNoms[j]](me2, you2);
+      const [s1, s2] = gain[p1 + p2];
+      score1 += s1;
+      score2 += s2;
+      me1.push(p1); you1.push(p2);
+      me2.push(p2); you2.push(p1);
+    }
+    scoresTotaux[profilsNoms[i]] += score1;
+  }
+}
+
+const classement = Object.entries(scoresTotaux).sort((a, b) => b[1] - a[1]);
+const tbody = document.querySelector("#resultats tbody");
+classement.forEach(([nom, score]) => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `<td>${nom}</td><td>${score}</td>`;
+  tbody.appendChild(tr);
+});
+</script>
+</body>
+</html>
