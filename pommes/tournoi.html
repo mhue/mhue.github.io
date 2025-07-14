@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Tournoi des Profils 🍏🍎</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #fffbe6;
+      padding: 2em;
+      max-width: 900px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 1em;
+    }
+    .joueur {
+      margin: 1em 0;
+    }
+    .nom {
+      font-weight: bold;
+      width: 180px;
+      display: inline-block;
+    }
+    .barre {
+      display: inline-block;
+      height: 24px;
+      background: #a5d6a7;
+      border-radius: 12px;
+      vertical-align: middle;
+      margin-right: 10px;
+    }
+    .score {
+      font-size: 1em;
+      display: inline-block;
+      vertical-align: middle;
+      min-width: 50px;
+    }
+    .medaille {
+      font-size: 1.4em;
+      margin-left: 0.5em;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🏆 Tournoi des Profils 🍎</h1>
+
+<div id="classement"></div>
+
+<script>
+  const nbTours = 10;
+
+  const profils = [
+    "GENTILLE", "MÉCHANTE", "LUNATIQUE", "DONNANT-DONNANT",
+    "RANCUNIÈRE", "PÉRIODIQUE-MÉCHANTE", "PÉRIODIQUE-GENTILLE",
+    "MAJORITÉ-MOU", "MÉFIANTE", "MAJORITÉ-DUR", "SONDEUR", "DONNANT-DONNANT-DUR"
+  ];
+
+  let scores = Object.fromEntries(profils.map(p => [p, 0]));
+
+  // comportement des profils
+  function strategie(profil, historique, moi, adv) {
+    const tour = historique.length;
+    const maj = (arr) => arr.reduce((a,b) => a + (b === 'C' ? 1 : 0), 0) >= arr.length/2 ? 'C' : 'D';
+    switch (profil) {
+      case "GENTILLE": return 'C';
+      case "MÉCHANTE": return 'D';
+      case "LUNATIQUE": return Math.random() < 0.5 ? 'C' : 'D';
+      case "DONNANT-DONNANT": return tour === 0 ? 'C' : historique[tour-1][adv];
+      case "RANCUNIÈRE": return historique.some(h => h[adv] === 'D') ? 'D' : 'C';
+      case "PÉRIODIQUE-MÉCHANTE": return ['D','D','C'][tour % 3];
+      case "PÉRIODIQUE-GENTILLE": return ['C','C','D'][tour % 3];
+      case "MAJORITÉ-MOU":
+        return tour === 0 ? 'C' : maj(historique.map(h => h[adv]));
+      case "MÉFIANTE": return tour === 0 ? 'D' : historique[tour-1][adv];
+      case "MAJORITÉ-DUR":
+        return tour === 0 ? 'D' : maj(historique.map(h => h[adv])) === 'C' ? 'C' : 'D';
+      case "SONDEUR":
+        if (tour === 0) return 'D';
+        if (tour === 1 || tour === 2) return 'C';
+        const coop2et3 = historique[1]?.[adv] === 'C' && historique[2]?.[adv] === 'C';
+        if (coop2et3) return 'D';
+        return historique[tour-1][adv];
+      case "DONNANT-DONNANT-DUR":
+        if (tour < 2) return 'C';
+        return (historique[tour-1][adv] === 'D' || historique[tour-2][adv] === 'D') ? 'D' : 'C';
+    }
+  }
+
+  const gains = {
+    'CC': [3, 3],
+    'CD': [0, 5],
+    'DC': [5, 0],
+    'DD': [1, 1]
+  };
+
+  async function jouerMatch(p1, p2) {
+    const historique = [];
+    let score1 = 0, score2 = 0;
+    for (let i = 0; i < nbTours; i++) {
+      const coup1 = strategie(p1, historique, 'p1', 'p2');
+      const coup2 = strategie(p2, historique, 'p2', 'p1');
+      const clé = coup1 + coup2;
+      const [g1, g2] = gains[clé];
+      score1 += g1;
+      score2 += g2;
+      historique.push({p1: coup1, p2: coup2});
+    }
+    scores[p1] += score1;
+    scores[p2] += score2;
+    updateUI();
+    await new Promise(r => setTimeout(r, 200)); // pause visuelle
+  }
+
+  function updateUI() {
+    const conteneur = document.getElementById("classement");
+    conteneur.innerHTML = "";
+
+    const classement = [...profils].sort((a,b) => scores[b] - scores[a]);
+
+    classement.forEach((nom, i) => {
+      const div = document.createElement("div");
+      div.className = "joueur";
+      const pourcent = scores[nom] / (nbTours * (profils.length - 1) * 5) * 100;
+      const barre = `<div class="barre" style="width: ${pourcent*5}px"></div>`;
+      const pommes = "🍎".repeat(Math.floor(scores[nom]/10));
+      let medaille = "";
+      if (i === 0) medaille = "🥇";
+      else if (i === 1) medaille = "🥈";
+      else if (i === 2) medaille = "🥉";
+      div.innerHTML = `<span class="nom">${nom}</span> ${barre} <span class="score">${scores[nom]} ${pommes} <span class="medaille">${medaille}</span></span>`;
+      conteneur.appendChild(div);
+    });
+  }
+
+  async function tournoi() {
+    for (let i = 0; i < profils.length; i++) {
+      for (let j = i + 1; j < profils.length; j++) {
+        await jouerMatch(profils[i], profils[j]);
+      }
+    }
+  }
+
+  tournoi();
+</script>
+
+</body>
+</html>
