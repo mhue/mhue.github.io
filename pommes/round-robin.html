@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Tournoi Round-Robin - Profils Pommes</title>
+  <style>
+    body { display: flex; justify-content: center; align-items: center; flex-direction: column; height: 100vh; margin: 0; background: #f4f4f4; font-family: sans-serif; }
+    canvas { background: white; border: 1px solid #ccc; }
+    .legend { margin-top: 20px; display: grid; grid-template-columns: repeat(4, auto); gap: 10px; font-size: 16px; }
+    .legend div { display: flex; align-items: center; }
+    .legend span { margin-left: 8px; }
+  </style>
+</head>
+<body>
+<canvas id="roundRobinCanvas" width="700" height="700"></canvas>
+<div class="legend">
+  <div>🌟<span>GENTILLE</span></div>
+  <div>😠<span>MÉCHANTE</span></div>
+  <div>🌙<span>LUNATIQUE</span></div>
+  <div>🤝<span>DONNANT-DONNANT</span></div>
+  <div>🧱<span>RANCUNIÈRE</span></div>
+  <div>⏰<span>PÉRIODIQUE-MÉCHANTE</span></div>
+  <div>⏳<span>PÉRIODIQUE-GENTILLE</span></div>
+  <div>📊<span>MAJORITÉ-MOU</span></div>
+  <div>🕶<span>MÉFIANTE</span></div>
+  <div>💪<span>MAJORITÉ-DUR</span></div>
+  <div>🧪<span>SONDEUR</span></div>
+  <div>🧊<span>DONNANT-DONNANT-DUR</span></div>
+</div>
+<script>
+const canvas = document.getElementById('roundRobinCanvas');
+const ctx = canvas.getContext('2d');
+const N = 12;
+const RADIUS = 250;
+const SPECIAL_RADIUS = 330;
+const CENTER_X = canvas.width / 2;
+const CENTER_Y = canvas.height / 2;
+let round = 0;
+
+const emojis = [
+  '🌟', '😠', '🌙', '🤝', '🧱', '⏰',
+  '⏳', '📊', '🕶', '💪', '🧪', '🧊'
+];
+
+// Fixed positions for all players except special one
+const angleStep = (2 * Math.PI) / (N - 1);
+const fixedPositions = Array.from({length: N - 1}, (_, i) => {
+  const angle = i * angleStep;
+  return {
+    x: CENTER_X + RADIUS * Math.cos(angle),
+    y: CENTER_Y + RADIUS * Math.sin(angle),
+    idx: i
+  };
+});
+
+function drawCircle(x, y, emoji, color = 'blue') {
+  ctx.beginPath();
+  ctx.arc(x, y, 20, 0, 2 * Math.PI);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.stroke();
+  ctx.font = '20px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = 'black';
+  ctx.fillText(emoji, x, y);
+}
+
+function drawLine(x1, y1, x2, y2, color = 'black') {
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.strokeStyle = color;
+  ctx.stroke();
+}
+
+function getRotatedIndices(round) {
+  const indices = Array.from({length: N - 1}, (_, i) => i);
+  return indices.slice(round).concat(indices.slice(0, round));
+}
+
+function drawRoundRobin(round) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw fixed players
+  fixedPositions.forEach(pos => drawCircle(pos.x, pos.y, emojis[pos.idx]));
+
+  // Draw special (rotating) player outside the circle
+  const specialAngle = round * angleStep;
+  const specialX = CENTER_X + SPECIAL_RADIUS * Math.cos(specialAngle);
+  const specialY = CENTER_Y + SPECIAL_RADIUS * Math.sin(specialAngle);
+  drawCircle(specialX, specialY, emojis[N - 1], 'red');
+
+  // Rotated view of players for matchups
+  const rotated = getRotatedIndices(round);
+
+  // Matchups between fixed players (rotated edges only), skipping rotated[0]
+  for (let i = 0; i < (N - 2) / 2; i++) {
+    const a = fixedPositions[rotated[i + 1]];
+    const b = fixedPositions[rotated[N - 2 - i]];
+    drawLine(a.x, a.y, b.x, b.y);
+  }
+
+  // Matchup with special player
+  const specialOpponent = fixedPositions[rotated[0]];
+  drawLine(specialX, specialY, specialOpponent.x, specialOpponent.y, 'gray');
+}
+
+setInterval(() => {
+  drawRoundRobin(round);
+  round = (round + 1) % (N - 1);
+}, 1000);
+</script>
+</body>
+</html>
