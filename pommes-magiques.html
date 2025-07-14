@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Le Jeu des Pommes Magiques 🍎</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2em;
+      max-width: 600px;
+      margin: auto;
+      background: #fff8e1;
+    }
+    h1 {
+      text-align: center;
+    }
+    button {
+      font-size: 1.2em;
+      margin: 0.5em;
+      padding: 0.5em 1em;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+    .partager {
+      background-color: #a5d6a7;
+    }
+    .garder {
+      background-color: #ef9a9a;
+    }
+    .historique {
+      margin-top: 2em;
+      border-collapse: collapse;
+      width: 100%;
+    }
+    .historique th, .historique td {
+      border: 1px solid #aaa;
+      padding: 0.5em;
+      text-align: center;
+    }
+    .score {
+      font-size: 1.2em;
+      margin-top: 1em;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🍎 Le Jeu des Pommes Magiques 🍏</h1>
+
+<p>Le robot joue avec toi, et le pommier magique compte les pommes ! Choisis ton action :</p>
+<button class="partager" onclick="jouerUnTour('C')">🍎 Partager</button>
+<button class="garder" onclick="jouerUnTour('D')">🍏 Garder</button>
+
+<div class="score" id="tableauScores">Tes pommes : 0 | Celles du robot : 0</div>
+
+<table class="historique" id="tableHistorique">
+  <thead>
+    <tr>
+      <th>Tour</th>
+      <th>Toi</th>
+      <th>Robot</th>
+      <th>Récolte (Toi, Robot)</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+  const gain = {
+    'CC': [3, 3],
+    'CD': [0, 5],
+    'DC': [5, 0],
+    'DD': [1, 1]
+  };
+
+  let historique = [];
+  let scoreJoueur = 0;
+  let scoreRobot = 0;
+
+  function strategieRobot() {
+    if (historique.length === 0) return 'C'; // commence par partager
+    return historique[historique.length - 1].joueur; // imite le dernier coup du joueur
+  }
+
+  function traduction(coup) {
+    return coup === 'C' ? '🍎 Partager' : '🍏 Garder';
+  }
+
+  function jouerUnTour(coupJoueur) {
+    const coupRobot = strategieRobot();
+    const clé = coupJoueur + coupRobot;
+    const [ptsJoueur, ptsRobot] = gain[clé];
+
+    scoreJoueur += ptsJoueur;
+    scoreRobot += ptsRobot;
+
+    historique.push({ tour: historique.length + 1, joueur: coupJoueur, robot: coupRobot, ptsJoueur, ptsRobot });
+
+    mettreAJourInterface();
+  }
+
+  function mettreAJourInterface() {
+    const tableau = document.getElementById("tableHistorique").querySelector("tbody");
+    tableau.innerHTML = "";
+
+    historique.forEach(entree => {
+      const ligne = `<tr>
+        <td>${entree.tour}</td>
+        <td>${traduction(entree.joueur)}</td>
+        <td>${traduction(entree.robot)}</td>
+        <td>${entree.ptsJoueur}, ${entree.ptsRobot}</td>
+      </tr>`;
+      tableau.innerHTML += ligne;
+    });
+
+    document.getElementById("tableauScores").textContent = `Tes pommes : ${scoreJoueur} | Celles du robot : ${scoreRobot}`;
+  }
+</script>
+
+</body>
+</html>
