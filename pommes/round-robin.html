@@ -35,6 +35,7 @@ const RADIUS = 250;
 const SPECIAL_RADIUS = 330;
 const CENTER_X = canvas.width / 2;
 const CENTER_Y = canvas.height / 2;
+const NODE_RADIUS = 20;
 let round = 0;
 
 const emojis = [
@@ -49,13 +50,14 @@ const fixedPositions = Array.from({length: N - 1}, (_, i) => {
   return {
     x: CENTER_X + RADIUS * Math.cos(angle),
     y: CENTER_Y + RADIUS * Math.sin(angle),
+    angle: angle,
     idx: i
   };
 });
 
 function drawCircle(x, y, emoji, color = 'blue') {
   ctx.beginPath();
-  ctx.arc(x, y, 20, 0, 2 * Math.PI);
+  ctx.arc(x, y, NODE_RADIUS, 0, 2 * Math.PI);
   ctx.fillStyle = color;
   ctx.fill();
   ctx.stroke();
@@ -66,10 +68,15 @@ function drawCircle(x, y, emoji, color = 'blue') {
   ctx.fillText(emoji, x, y);
 }
 
-function drawLine(x1, y1, x2, y2, color = 'black') {
+function drawTrimmedLine(x1, y1, x2, y2, color = 'black') {
+  const dx = x2 - x1;
+  const dy = y2 - y1;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+  const offsetX = (dx / dist) * NODE_RADIUS;
+  const offsetY = (dy / dist) * NODE_RADIUS;
   ctx.beginPath();
-  ctx.moveTo(x1, y1);
-  ctx.lineTo(x2, y2);
+  ctx.moveTo(x1 + offsetX, y1 + offsetY);
+  ctx.lineTo(x2 - offsetX, y2 - offsetY);
   ctx.strokeStyle = color;
   ctx.stroke();
 }
@@ -98,12 +105,12 @@ function drawRoundRobin(round) {
   for (let i = 0; i < (N - 2) / 2; i++) {
     const a = fixedPositions[rotated[i + 1]];
     const b = fixedPositions[rotated[N - 2 - i]];
-    drawLine(a.x, a.y, b.x, b.y);
+    drawTrimmedLine(a.x, a.y, b.x, b.y);
   }
 
   // Matchup with special player
   const specialOpponent = fixedPositions[rotated[0]];
-  drawLine(specialX, specialY, specialOpponent.x, specialOpponent.y, 'gray');
+  drawTrimmedLine(specialX, specialY, specialOpponent.x, specialOpponent.y, 'gray');
 }
 
 setInterval(() => {
