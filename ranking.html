@@ -29,6 +29,15 @@
       font-size: 0.8em;
       color: #555;
     }
+    .gold {
+      background-color: #ffd70055;
+    }
+    .silver {
+      background-color: #c0c0c055;
+    }
+    .bronze {
+      background-color: #cd7f3255;
+    }
   </style>
 </head>
 <body>
@@ -111,8 +120,13 @@ for (let i = 0; i < profilsNoms.length; i++) {
 
 const classement = Object.entries(scoresTotaux).sort((a, b) => b[1] - a[1]);
 const tbody = document.querySelector("#resultats tbody");
-classement.forEach(([nom, score]) => {
+classement.forEach(([nom, score], index) => {
   const tr = document.createElement("tr");
+  let classe = "";
+  if (index === 0) classe = "gold";
+  else if (index === 1) classe = "silver";
+  else if (index === 2) classe = "bronze";
+  tr.className = classe;
   tr.innerHTML = `<td>${nom}</td><td>${score}</td>`;
   tbody.appendChild(tr);
 });
