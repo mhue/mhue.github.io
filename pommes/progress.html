@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Tournoi Progressif des Profils 🍏🍎</title>
+  <style>
+    body { font-family: sans-serif; background: #f4f4f4; padding: 2em; max-width: 1000px; margin: auto; }
+    h1 { text-align: center; }
+    .joueur { display: flex; align-items: center; margin: 10px 0; }
+    .emoji { font-size: 1.5em; width: 40px; text-align: center; }
+    .nom { flex: 1; }
+    .barre {
+      height: 24px;
+      background: #aed581;
+      border-radius: 12px;
+      transition: width 0.5s;
+    }
+    .progress-container { flex: 3; background: #e0e0e0; border-radius: 12px; overflow: hidden; margin: 0 10px; }
+    .score { width: 60px; text-align: right; font-weight: bold; }
+  </style>
+</head>
+<body>
+<h1>🍎 Tournoi Round-Robin des Profils 🍏</h1>
+<div id="tableau"></div>
+
+<script>
+const profils = [
+  ['🌟', 'GENTILLE'], ['😠', 'MÉCHANTE'], ['🌙', 'LUNATIQUE'], ['🤝', 'DONNANT-DONNANT'],
+  ['🧱', 'RANCUNIÈRE'], ['⏰', 'PÉRIODIQUE-MÉCHANTE'], ['⏳', 'PÉRIODIQUE-GENTILLE'], ['📊', 'MAJORITÉ-MOU'],
+  ['🕶', 'MÉFIANTE'], ['💪', 'MAJORITÉ-DUR'], ['🧪', 'SONDEUR'], ['🧊', 'DONNANT-DONNANT-DUR']
+];
+
+const scores = Object.fromEntries(profils.map(([_, nom]) => [nom, 0]));
+const gain = { 'CC': [3, 3], 'CD': [0, 5], 'DC': [5, 0], 'DD': [1, 1] };
+const nbTours = 10;
+const tableau = document.getElementById("tableau");
+
+function updateUI() {
+  tableau.innerHTML = "";
+  const classement = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  classement.forEach(([nom, score]) => {
+    const [emoji] = profils.find(p => p[1] === nom);
+    const pourcent = score / (nbTours * 5 * (profils.length - 1)) * 100;
+    tableau.innerHTML += `
+      <div class="joueur">
+        <div class="emoji">${emoji}</div>
+        <div class="nom">${nom}</div>
+        <div class="progress-container">
+          <div class="barre" style="width: ${pourcent}%;"></div>
+        </div>
+        <div class="score">${score} 🍎</div>
+      </div>
+    `;
+  });
+}
+
+function strategie(profil, historique, moi, adv) {
+  const tour = historique.length;
+  const maj = (arr) => arr.reduce((a, b) => a + (b === 'C' ? 1 : 0), 0) >= arr.length / 2 ? 'C' : 'D';
+  switch (profil) {
+    case "GENTILLE": return 'C';
+    case "MÉCHANTE": return 'D';
+    case "LUNATIQUE": return Math.random() < 0.5 ? 'C' : 'D';
+    case "DONNANT-DONNANT": return tour === 0 ? 'C' : historique[tour - 1][adv];
+    case "RANCUNIÈRE": return historique.some(h => h[adv] === 'D') ? 'D' : 'C';
+    case "PÉRIODIQUE-MÉCHANTE": return ['D', 'D', 'C'][tour % 3];
+    case "PÉRIODIQUE-GENTILLE": return ['C', 'C', 'D'][tour % 3];
+    case "MAJORITÉ-MOU":
+      return tour === 0 ? 'C' : maj(historique.map(h => h[adv]));
+    case "MÉFIANTE": return tour === 0 ? 'D' : historique[tour - 1][adv];
+    case "MAJORITÉ-DUR":
+      return tour === 0 ? 'D' : maj(historique.map(h => h[adv])) === 'C' ? 'C' : 'D';
+    case "SONDEUR":
+      if (tour === 0) return 'D';
+      if (tour === 1 || tour === 2) return 'C';
+      const coop2et3 = historique[1]?.[adv] === 'C' && historique[2]?.[adv] === 'C';
+      if (coop2et3) return 'D';
+      return historique[tour - 1][adv];
+    case "DONNANT-DONNANT-DUR":
+      if (tour < 2) return 'C';
+      return (historique[tour - 1][adv] === 'D' || historique[tour - 2][adv] === 'D') ? 'D' : 'C';
+  }
+}
+
+async function simulateMatch(nom1, nom2) {
+  let historique = [];
+  let score1 = 0, score2 = 0;
+  for (let t = 0; t < nbTours; t++) {
+    const c1 = strategie(nom1, historique, 'p1', 'p2');
+    const c2 = strategie(nom2, historique, 'p2', 'p1');
+    const [s1, s2] = gain[c1 + c2];
+    historique.push({ p1: c1, p2: c2 });
+    score1 += s1;
+    score2 += s2;
+  }
+  scores[nom1] += score1;
+  scores[nom2] += score2;
+  updateUI();
+  await new Promise(r => setTimeout(r, 100));
+}
+
+async function tournoiRoundRobin() {
+  for (let round = 0; round < profils.length - 1; round++) {
+    const rotating = [...profils.slice(0, profils.length - 1)].slice(round).concat(profils.slice(0, round));
+    const pairings = [];
+    for (let i = 0; i < (rotating.length - 1) / 2; i++) {
+      pairings.push([rotating[i + 1][1], rotating[rotating.length - 1 - i][1]]);
+    }
+    pairings.push([profils[profils.length - 1][1], rotating[0][1]]);
+    for (let [a, b] of pairings) {
+      await simulateMatch(a, b);
+    }
+  }
+}
+
+tournoiRoundRobin();
+</script>
+</body>
+</html>
