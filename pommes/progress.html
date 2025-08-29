@@ -6,6 +6,45 @@
   <style>
     body { font-family: sans-serif; background: #f4f4f4; padding: 2em; max-width: 1000px; margin: auto; }
     h1 { text-align: center; }
+    .controls {
+      text-align: center;
+      margin: 20px 0;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .time-input {
+      margin: 10px;
+      padding: 10px;
+      font-size: 16px;
+      border: 2px solid #ddd;
+      border-radius: 5px;
+      width: 100px;
+    }
+    .btn {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .btn-primary { background: #4CAF50; color: white; }
+    .btn-primary:hover { background: #45a049; }
+    .btn-secondary { background: #2196F3; color: white; }
+    .btn-secondary:hover { background: #1976D2; }
+    .btn-danger { background: #f44336; color: white; }
+    .btn-danger:hover { background: #d32f2f; }
+    .status {
+      margin: 10px 0;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .status.running { color: #4CAF50; }
+    .status.paused { color: #FF9800; }
+    .status.stopped { color: #f44336; }
     .joueur { display: flex; align-items: center; margin: 10px 0; }
     .emoji { font-size: 1.5em; width: 40px; text-align: center; }
     .nom { flex: 1; }
@@ -21,6 +60,21 @@
 </head>
 <body>
 <h1>🍎 Tournoi Round-Robin des Profils 🍏</h1>
+
+<div class="controls">
+  <div>
+    <label for="tournamentTime">Durée du tournoi :</label>
+    <input type="number" id="tournamentTime" class="time-input" value="30" min="5" max="300">
+    <span>secondes</span>
+  </div>
+  <div class="status" id="status">Prêt à démarrer</div>
+  <div>
+    <button class="btn btn-primary" id="startBtn" onclick="startTournament()">▶️ Démarrer</button>
+    <button class="btn btn-secondary" id="pauseBtn" onclick="pauseTournament()" disabled>⏸️ Pause</button>
+    <button class="btn btn-danger" id="resetBtn" onclick="resetTournament()">🔄 Reset</button>
+  </div>
+</div>
+
 <div id="tableau"></div>
 
 <script>
@@ -30,10 +84,18 @@ const profils = [
   ['🕵️', 'MÉFIANTE'], ['💪', 'MAJORITÉ-DUR'], ['🧪', 'SONDEUR'], ['🧊', 'DONNANT-DONNANT-DUR']
 ];
 
-const scores = Object.fromEntries(profils.map(([_, nom]) => [nom, 0]));
+let scores = Object.fromEntries(profils.map(([_, nom]) => [nom, 0]));
 const gain = { 'CC': [3, 3], 'CD': [0, 5], 'DC': [5, 0], 'DD': [1, 1] };
 const nbTours = 10;
 const tableau = document.getElementById("tableau");
+
+// Tournament control variables
+let tournamentRunning = false;
+let tournamentPaused = false;
+let matchDelay = 100;
+let totalMatches = 0;
+let currentMatch = 0;
+let startTime = 0;
 
 function updateUI() {
   tableau.innerHTML = "";
@@ -95,12 +157,23 @@ async function simulateMatch(nom1, nom2) {
   }
   scores[nom1] += score1;
   scores[nom2] += score2;
+  currentMatch++;
   updateUI();
-  await new Promise(r => setTimeout(r, 100));
+  updateStatus();
+  
+  // Wait for pause to be lifted if tournament is paused
+  while (tournamentPaused && tournamentRunning) {
+    await new Promise(r => setTimeout(r, 100));
+  }
+  
+  // Only delay if tournament is still running
+  if (tournamentRunning) {
+    await new Promise(r => setTimeout(r, matchDelay));
+  }
 }
 
 async function tournoiRoundRobin() {
-  for (let round = 0; round < profils.length - 1; round++) {
+  for (let round = 0; round < profils.length - 1 && tournamentRunning; round++) {
     const rotating = [...profils.slice(0, profils.length - 1)].slice(round).concat(profils.slice(0, round));
     const pairings = [];
     for (let i = 0; i < (rotating.length - 1) / 2; i++) {
@@ -108,12 +181,117 @@ async function tournoiRoundRobin() {
     }
     pairings.push([profils[profils.length - 1][1], rotating[0][1]]);
     for (let [a, b] of pairings) {
+      if (!tournamentRunning) break;
       await simulateMatch(a, b);
     }
   }
+  
+  if (tournamentRunning) {
+    tournamentRunning = false;
+    updateStatus("Tournoi terminé ! 🏁");
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('pauseBtn').disabled = true;
+  }
 }
 
-tournoiRoundRobin();
+// Calculate total number of matches in a round-robin tournament
+function calculateTotalMatches() {
+  const n = profils.length;
+  return (n * (n - 1)) / 2;
+}
+
+// Update status display
+function updateStatus(customMessage = null) {
+  const statusElement = document.getElementById('status');
+  
+  if (customMessage) {
+    statusElement.textContent = customMessage;
+    statusElement.className = 'status';
+    return;
+  }
+  
+  if (!tournamentRunning) {
+    statusElement.textContent = 'Prêt à démarrer';
+    statusElement.className = 'status';
+  } else if (tournamentPaused) {
+    statusElement.textContent = `En pause (${currentMatch}/${totalMatches} matchs)`;
+    statusElement.className = 'status paused';
+  } else {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const tournamentDuration = parseInt(document.getElementById('tournamentTime').value);
+    const remaining = Math.max(0, tournamentDuration - elapsed);
+    statusElement.textContent = `En cours... ${currentMatch}/${totalMatches} matchs - ${remaining}s restantes`;
+    statusElement.className = 'status running';
+  }
+}
+
+// Start tournament
+function startTournament() {
+  const tournamentTimeInput = document.getElementById('tournamentTime');
+  const tournamentDuration = parseInt(tournamentTimeInput.value);
+  
+  if (tournamentDuration < 5 || tournamentDuration > 300) {
+    alert('La durée doit être entre 5 et 300 secondes');
+    return;
+  }
+  
+  // Calculate delay between matches
+  totalMatches = calculateTotalMatches();
+  matchDelay = Math.max(50, (tournamentDuration * 1000) / totalMatches);
+  
+  // Reset tournament state
+  currentMatch = 0;
+  startTime = Date.now();
+  tournamentRunning = true;
+  tournamentPaused = false;
+  
+  // Update UI
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('pauseBtn').disabled = false;
+  tournamentTimeInput.disabled = true;
+  
+  // Start tournament
+  tournoiRoundRobin();
+}
+
+// Pause/Resume tournament
+function pauseTournament() {
+  const pauseBtn = document.getElementById('pauseBtn');
+  
+  if (tournamentPaused) {
+    tournamentPaused = false;
+    pauseBtn.textContent = '⏸️ Pause';
+    startTime = Date.now() - (currentMatch * matchDelay);
+  } else {
+    tournamentPaused = true;
+    pauseBtn.textContent = '▶️ Reprendre';
+  }
+  
+  updateStatus();
+}
+
+// Reset tournament
+function resetTournament() {
+  tournamentRunning = false;
+  tournamentPaused = false;
+  currentMatch = 0;
+  
+  // Reset scores
+  scores = Object.fromEntries(profils.map(([_, nom]) => [nom, 0]));
+  
+  // Reset UI
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('pauseBtn').disabled = true;
+  document.getElementById('pauseBtn').textContent = '⏸️ Pause';
+  document.getElementById('tournamentTime').disabled = false;
+  
+  updateUI();
+  updateStatus();
+}
+
+// Initialize UI
+updateUI();
+updateStatus();
 </script>
 </body>
 </html>
