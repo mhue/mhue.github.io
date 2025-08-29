@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cartes des Profils - Jeu des Pommes</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 0;
+    }
+    
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: white;
+    }
+    
+    .card {
+      width: 210mm;
+      height: 297mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      page-break-after: always;
+      padding: 40px;
+      box-sizing: border-box;
+      background: linear-gradient(135deg, #fff8e1 0%, #f3e5ab 100%);
+      border: 3px solid #8d6e63;
+    }
+    
+    .card:last-child {
+      page-break-after: avoid;
+    }
+    
+    .emoji {
+      font-size: 120px;
+      line-height: 1;
+      margin-bottom: 30px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .profile-name {
+      font-size: 48px;
+      font-weight: bold;
+      color: #4e342e;
+      margin-bottom: 40px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .profile-rule {
+      font-size: 24px;
+      line-height: 1.4;
+      color: #5d4037;
+      max-width: 80%;
+      margin: 0 auto;
+      padding: 30px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .profile-rule strong {
+      color: #3e2723;
+    }
+    
+    .apple-icons {
+      font-size: 18px;
+      margin: 0 3px;
+    }
+    
+    @media print {
+      body {
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Carte 1: GENTILLE -->
+  <div class="card">
+    <div class="emoji">🌟</div>
+    <div class="profile-name">GENTILLE</div>
+    <div class="profile-rule">
+      Je choisis <strong>toujours de partager</strong> les pommes. <span class="apple-icons">🍎</span>
+    </div>
+  </div>
+
+  <!-- Carte 2: MÉCHANTE -->
+  <div class="card">
+    <div class="emoji">😠</div>
+    <div class="profile-name">MÉCHANTE</div>
+    <div class="profile-rule">
+      Je choisis <strong>toujours de garder</strong> les pommes. <span class="apple-icons">🍏</span>
+    </div>
+  </div>
+
+  <!-- Carte 3: LUNATIQUE -->
+  <div class="card">
+    <div class="emoji">🌙</div>
+    <div class="profile-name">LUNATIQUE</div>
+    <div class="profile-rule">
+      Je choisis <strong>au hasard</strong> entre partager <span class="apple-icons">🍎</span> et garder <span class="apple-icons">🍏</span>, à chaque tour.
+    </div>
+  </div>
+
+  <!-- Carte 4: DONNANT-DONNANT -->
+  <div class="card">
+    <div class="emoji">🤝</div>
+    <div class="profile-name">DONNANT-DONNANT</div>
+    <div class="profile-rule">
+      Je commence par <strong>partager</strong> <span class="apple-icons">🍎</span>, puis je fais <strong>comme toi au tour précédent</strong>.
+    </div>
+  </div>
+
+  <!-- Carte 5: RANCUNIÈRE -->
+  <div class="card">
+    <div class="emoji">🤨</div>
+    <div class="profile-name">RANCUNIÈRE</div>
+    <div class="profile-rule">
+      Je <strong>partage</strong> <span class="apple-icons">🍎</span> jusqu'à ce que tu gardes <span class="apple-icons">🍏</span> une fois…<br>
+      Ensuite, je garde à tous les tours. <span class="apple-icons">🍏</span>
+    </div>
+  </div>
+
+  <!-- Carte 6: PÉRIODIQUE-MÉCHANTE -->
+  <div class="card">
+    <div class="emoji">⏰</div>
+    <div class="profile-name">PÉRIODIQUE-MÉCHANTE</div>
+    <div class="profile-rule">
+      Je joue en rythme : <strong>garder, garder, partager</strong>, puis je recommence.<br>
+      <span class="apple-icons">🍏🍏🍎</span>…
+    </div>
+  </div>
+
+  <!-- Carte 7: PÉRIODIQUE-GENTILLE -->
+  <div class="card">
+    <div class="emoji">⏳</div>
+    <div class="profile-name">PÉRIODIQUE-GENTILLE</div>
+    <div class="profile-rule">
+      Je joue en rythme : <strong>partager, partager, garder</strong>, puis je recommence.<br>
+      <span class="apple-icons">🍎🍎🍏</span>…
+    </div>
+  </div>
+
+  <!-- Carte 8: MAJORITÉ-MOU -->
+  <div class="card">
+    <div class="emoji">🤗</div>
+    <div class="profile-name">MAJORITÉ-MOU</div>
+    <div class="profile-rule">
+      Je regarde ce que tu fais le plus souvent.<br>
+      Si tu partages <span class="apple-icons">🍎</span> plus souvent, je partage.<br>
+      S'il y a égalité ou c'est le premier tour, je <strong>partage</strong>.
+    </div>
+  </div>
+
+  <!-- Carte 9: MÉFIANTE -->
+  <div class="card">
+    <div class="emoji">🕵️</div>
+    <div class="profile-name">MÉFIANTE</div>
+    <div class="profile-rule">
+      Je commence par <strong>garder</strong> <span class="apple-icons">🍏</span>, puis je fais <strong>comme toi au tour d'avant</strong>.
+    </div>
+  </div>
+
+  <!-- Carte 10: MAJORITÉ-DUR -->
+  <div class="card">
+    <div class="emoji">💪</div>
+    <div class="profile-name">MAJORITÉ-DUR</div>
+    <div class="profile-rule">
+      Je regarde ce que tu fais le plus souvent.<br>
+      Si tu gardes <span class="apple-icons">🍏</span> plus souvent, je garde aussi.<br>
+      En cas d'égalité ou au premier tour, je <strong>garde</strong>.
+    </div>
+  </div>
+
+  <!-- Carte 11: SONDEUR -->
+  <div class="card">
+    <div class="emoji">🧪</div>
+    <div class="profile-name">SONDEUR</div>
+    <div class="profile-rule">
+      Je commence par : <span class="apple-icons">🍏</span> garder, <span class="apple-icons">🍎</span> partager, <span class="apple-icons">🍎</span> partager.<br>
+      Ensuite :<br>
+      → si tu as partagé aux tours 2 et 3, je <strong>garde toujours</strong> <span class="apple-icons">🍏</span><br>
+      → sinon, je joue comme un <strong>DONNANT-DONNANT</strong>
+    </div>
+  </div>
+
+  <!-- Carte 12: DONNANT-DONNANT-DUR -->
+  <div class="card">
+    <div class="emoji">🧊</div>
+    <div class="profile-name">DONNANT-DONNANT-DUR</div>
+    <div class="profile-rule">
+      Je <strong>partage</strong> <span class="apple-icons">🍎</span> sauf si tu as gardé <span class="apple-icons">🍏</span> à l'un des deux derniers tours.<br>
+      Dans ce cas, je garde aussi. <span class="apple-icons">🍏</span>
+    </div>
+  </div>
+
+</body>
+</html>
