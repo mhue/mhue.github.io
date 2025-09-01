@@ -17,6 +17,7 @@
     .container {
       max-width: 1200px;
       margin: auto;
+      position: relative;
     }
     h1 {
       text-align: center;
@@ -26,6 +27,12 @@
     .game-controls {
       text-align: center;
       margin-bottom: 1em;
+    }
+    .reset-controls {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 100;
     }
     button {
       font-size: 1.2em;
@@ -126,6 +133,9 @@
     <p>Choisissez votre action :</p>
     <button class="share-btn" onclick="jouerUnTour('P')">🤝 Partager</button>
     <button onclick="jouerUnTour('G')">⚔️ Garder</button>
+  </div>
+  
+  <div class="reset-controls">
     <button class="reset-btn" onclick="resetGame()">🔄 Nouvelle partie</button>
   </div>
 
