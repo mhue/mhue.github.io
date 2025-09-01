@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dilemme du prisonnier itéré</title>
+  <title>Jeu du pommier itéré</title>
   <style>
     body {
       font-family: sans-serif;
@@ -38,11 +38,11 @@
 </head>
 <body>
 
-<h1>Dilemme du Prisonnier Itéré</h1>
+<h1>Jeu du Pommier Itéré</h1>
 
 <p>Choisissez votre action :</p>
-<button onclick="jouerUnTour('C')">🤝 Partager</button>
-<button onclick="jouerUnTour('D')">⚔️ Garder</button>
+<button onclick="jouerUnTour('P')">🤝 Partager</button>
+<button onclick="jouerUnTour('G')">⚔️ Garder</button>
 
 <div class="score" id="tableauScores">Votre score : 0 | Score du bot : 0</div>
 
@@ -51,8 +51,8 @@
     <tr>
       <th>Tour</th>
       <th>Vous</th>
-      <th>Bot</th>
-      <th>Scores (Vous, Bot)</th>
+      <th>Robot</th>
+      <th>Scores (Vous, Robot)</th>
     </tr>
   </thead>
   <tbody></tbody>
@@ -60,30 +60,30 @@
 
 <script>
   const gain = {
-    'CC': [3, 3],
-    'CD': [0, 5],
-    'DC': [5, 0],
-    'DD': [1, 1]
+    'PP': [3, 3],
+    'PG': [0, 5],
+    'GP': [5, 0],
+    'GG': [1, 1]
   };
 
   let historique = [];
   let scoreJoueur = 0;
-  let scoreBot = 0;
+  let scoreRobot = 0;
 
-  function strategieBot() {
-    if (historique.length === 0) return 'C'; // Tit for Tat commence par coopérer
+  function strategieRobot() {
+    if (historique.length === 0) return 'P'; // Tit for Tat commence par coopérer
     return historique[historique.length - 1].joueur; // Imite le dernier coup du joueur
   }
 
   function jouerUnTour(coupJoueur) {
-    const coupBot = strategieBot();
-    const clé = coupJoueur + coupBot;
-    const [ptsJoueur, ptsBot] = gain[clé];
+    const coupRobot = strategieRobot();
+    const clé = coupJoueur + coupRobot;
+    const [ptsJoueur, ptsRobot] = gain[clé];
 
     scoreJoueur += ptsJoueur;
-    scoreBot += ptsBot;
+    scoreRobot += ptsRobot;
 
-    historique.push({ tour: historique.length + 1, joueur: coupJoueur, bot: coupBot, ptsJoueur, ptsBot });
+    historique.push({ tour: historique.length + 1, joueur: coupJoueur, bot: coupRobot, ptsJoueur, ptsRobot });
 
     mettreAJourInterface();
   }
@@ -97,12 +97,12 @@
         <td>${entree.tour}</td>
         <td>${entree.joueur}</td>
         <td>${entree.bot}</td>
-        <td>${entree.ptsJoueur}, ${entree.ptsBot}</td>
+        <td>${entree.ptsJoueur}, ${entree.ptsRobot}</td>
       </tr>`;
       tableau.innerHTML += ligne;
     });
 
-    document.getElementById("tableauScores").textContent = `Votre score : ${scoreJoueur} | Score du bot : ${scoreBot}`;
+    document.getElementById("tableauScores").textContent = `Votre score : ${scoreJoueur} | Score du bot : ${scoreRobot}`;
   }
 </script>
 
