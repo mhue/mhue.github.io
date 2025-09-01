@@ -28,12 +28,7 @@
       text-align: center;
       margin-bottom: 1em;
     }
-    .reset-controls {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      z-index: 100;
-    }
+
     button {
       font-size: 1.2em;
       margin: 0.5em;
@@ -115,13 +110,95 @@
     .historique th {
       background: #f0f0f0;
     }
-    .reset-btn {
-      background: #f44336;
-      margin-top: 1em;
+
+    /* Mobile responsive styles */
+    @media (max-width: 768px) {
+      body {
+        padding: 0.5em;
+      }
+      
+      .container {
+        max-width: 100%;
+      }
+      
+      h1 {
+        font-size: 1.5em;
+        margin-bottom: 0.5em;
+      }
+      
+      .game-controls p {
+        font-size: 0.9em;
+        margin-bottom: 0.5em;
+      }
+      
+      button {
+        font-size: 1em;
+        margin: 0.3em;
+        padding: 0.6em 1.2em;
+      }
+      
+      .game-area {
+        flex-direction: column;
+        gap: 1em;
+      }
+      
+      .game-canvas {
+        order: 1;
+        width: 100%;
+        height: auto;
+      }
+      
+      .game-info {
+        order: 2;
+        flex: none;
+        width: 100%;
+        margin: 0;
+      }
+      
+      .score {
+        font-size: 1.2em;
+        padding: 0.8em;
+        margin-bottom: 0.8em;
+      }
+      
+      .score td:last-child {
+        font-size: 1.1em;
+      }
+      
+      .historique {
+        font-size: 0.8em;
+      }
+      
+      .historique th, .historique td {
+        padding: 0.2em;
+      }
     }
-    .reset-btn:hover {
-      background: #d32f2f;
+
+    @media (max-width: 480px) {
+      body {
+        padding: 0.3em;
+      }
+      
+      h1 {
+        font-size: 1.3em;
+      }
+      
+      button {
+        font-size: 0.9em;
+        padding: 0.5em 1em;
+        margin: 0.2em;
+      }
+      
+      .score {
+        font-size: 1.1em;
+        padding: 0.6em;
+      }
+      
+      .historique {
+        font-size: 0.7em;
+      }
     }
+
   </style>
 </head>
 <body>
@@ -135,9 +212,7 @@
     <button onclick="jouerUnTour('G')">⚔️ Garder</button>
   </div>
   
-  <div class="reset-controls">
-    <button class="reset-btn" onclick="resetGame()">🔄 Nouvelle partie</button>
-  </div>
+
 
   <div class="game-area">
     <div id="gameCanvas" class="game-canvas"></div>
@@ -192,16 +267,51 @@
   let apples = [];
   let bucketBodies = [];
 
-  // Game settings
-  const CANVAS_WIDTH = 800;
-  const CANVAS_HEIGHT = 600;
-  const BUCKET_WIDTH = 180;
-  const BUCKET_HEIGHT = 120;
-  const BUCKET_WALL_THICKNESS = 12;
-  const APPLE_RADIUS = 12;
+  // Game settings - will be adjusted for screen size
+  let CANVAS_WIDTH = 800;
+  let CANVAS_HEIGHT = 600;
+  let BUCKET_WIDTH = 180;
+  let BUCKET_HEIGHT = 120;
+  let BUCKET_WALL_THICKNESS = 12;
+  let APPLE_RADIUS = 12;
+
+  // Adjust canvas and game elements size based on screen
+  function adjustCanvasSize() {
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    
+    if (screenWidth <= 480) {
+      // Very small mobile screens
+      CANVAS_WIDTH = Math.min(screenWidth - 20, 400);
+      CANVAS_HEIGHT = Math.min(screenHeight * 0.5, 300);
+      BUCKET_WIDTH = 120;
+      BUCKET_HEIGHT = 80;
+      BUCKET_WALL_THICKNESS = 8;
+      APPLE_RADIUS = 8;
+    } else if (screenWidth <= 768) {
+      // Mobile screens
+      CANVAS_WIDTH = Math.min(screenWidth - 40, 600);
+      CANVAS_HEIGHT = Math.min(screenHeight * 0.6, 450);
+      BUCKET_WIDTH = 140;
+      BUCKET_HEIGHT = 100;
+      BUCKET_WALL_THICKNESS = 10;
+      APPLE_RADIUS = 10;
+    } else {
+      // Desktop screens - use original values
+      CANVAS_WIDTH = 800;
+      CANVAS_HEIGHT = 600;
+      BUCKET_WIDTH = 180;
+      BUCKET_HEIGHT = 120;
+      BUCKET_WALL_THICKNESS = 12;
+      APPLE_RADIUS = 12;
+    }
+  }
 
   // Initialize the game
   function initGame() {
+    // Adjust canvas size for mobile
+    adjustCanvasSize();
+    
     // Create PIXI application
     app = new PIXI.Application({
       width: CANVAS_WIDTH,
@@ -209,6 +319,12 @@
       backgroundColor: 0x87CEEB,
       antialias: true
     });
+    
+    // Make canvas responsive
+    app.view.style.width = '100%';
+    app.view.style.height = 'auto';
+    app.view.style.maxWidth = '800px';
+    app.view.style.display = 'block';
     
     document.getElementById('gameCanvas').appendChild(app.view);
 
@@ -229,8 +345,14 @@
 
   function createBuckets() {
     const bucketY = CANVAS_HEIGHT - BUCKET_HEIGHT - 20;
-    const leftBucketX = 150;
-    const rightBucketX = CANVAS_WIDTH - 150 - BUCKET_WIDTH;
+    
+    // Calculate responsive bucket positions
+    const margin = Math.max(20, CANVAS_WIDTH * 0.05); // 5% margin or minimum 20px
+    const availableWidth = CANVAS_WIDTH - (2 * margin) - (2 * BUCKET_WIDTH);
+    const spacing = Math.max(20, availableWidth * 0.3); // Space between buckets
+    
+    const leftBucketX = margin;
+    const rightBucketX = CANVAS_WIDTH - margin - BUCKET_WIDTH;
 
     // Create left bucket
     bucketLeft = createBucket(leftBucketX, bucketY, 0xFF6B6B); // Red-ish for player
@@ -323,7 +445,9 @@
     // Drop apples for player
     for (let i = 0; i < playerPoints; i++) {
       setTimeout(() => {
-        const x = bucketLeft.x + BUCKET_WIDTH/2 + (Math.random() - 0.5) * 60;
+        // Use responsive spread based on bucket width
+        const spread = Math.min(60, BUCKET_WIDTH * 0.4);
+        const x = bucketLeft.x + BUCKET_WIDTH/2 + (Math.random() - 0.5) * spread;
         const y = -20 - Math.random() * 50;
         createApple(x, y, true);
       }, i * 100 + Math.random() * 100);
@@ -332,7 +456,9 @@
     // Drop apples for bot
     for (let i = 0; i < botPoints; i++) {
       setTimeout(() => {
-        const x = bucketRight.x + BUCKET_WIDTH/2 + (Math.random() - 0.5) * 60;
+        // Use responsive spread based on bucket width
+        const spread = Math.min(60, BUCKET_WIDTH * 0.4);
+        const x = bucketRight.x + BUCKET_WIDTH/2 + (Math.random() - 0.5) * spread;
         const y = -20 - Math.random() * 50;
         createApple(x, y, false);
       }, i * 100 + Math.random() * 100);
@@ -400,24 +526,47 @@
     document.getElementById("scoreRobot").textContent = scoreRobot;
   }
 
-  function resetGame() {
-    // Clear game state
-    historique = [];
-    scoreJoueur = 0;
-    scoreRobot = 0;
-    
-    // Clear apples
-    apples.forEach(apple => {
-      app.stage.removeChild(apple.graphics);
-      Matter.World.remove(world, apple.body);
-    });
-    apples = [];
-    
-    mettreAJourInterface();
-  }
-
   // Initialize the game when page loads
   window.addEventListener('load', initGame);
+  
+  // Function to recreate buckets with new positions
+  function recreateBuckets() {
+    // Remove old bucket graphics
+    if (bucketLeft) {
+      app.stage.removeChild(bucketLeft);
+    }
+    if (bucketRight) {
+      app.stage.removeChild(bucketRight);
+    }
+    
+    // Remove old bucket physics bodies
+    bucketBodies.forEach(body => {
+      Matter.World.remove(world, body);
+    });
+    bucketBodies = [];
+    
+    // Create new buckets with responsive positions
+    createBuckets();
+  }
+
+  // Handle window resize for responsive canvas
+  window.addEventListener('resize', () => {
+    if (app) {
+      // Debounce resize events
+      clearTimeout(window.resizeTimeout);
+      window.resizeTimeout = setTimeout(() => {
+        const oldWidth = CANVAS_WIDTH;
+        const oldHeight = CANVAS_HEIGHT;
+        adjustCanvasSize();
+        
+        // Only recreate if size actually changed significantly
+        if (Math.abs(oldWidth - CANVAS_WIDTH) > 50 || Math.abs(oldHeight - CANVAS_HEIGHT) > 50) {
+          app.renderer.resize(CANVAS_WIDTH, CANVAS_HEIGHT);
+          recreateBuckets();
+        }
+      }, 250);
+    }
+  });
 </script>
 
 </body>
