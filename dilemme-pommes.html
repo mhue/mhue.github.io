@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jeu du pommier itéré</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.2/pixi.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 1em;
+      margin: auto;
+      background: linear-gradient(135deg, #87CEEB 0%, #98FB98 100%);
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1200px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+      color: #2F4F4F;
+      margin-bottom: 1em;
+    }
+    .game-controls {
+      text-align: center;
+      margin-bottom: 1em;
+    }
+    button {
+      font-size: 1.2em;
+      margin: 0.5em;
+      padding: 0.8em 1.5em;
+      border: none;
+      border-radius: 8px;
+      background: #4CAF50;
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .share-btn {
+      background: #2196F3;
+    }
+    .share-btn:hover {
+      background: #1976D2;
+    }
+    .game-area {
+      display: flex;
+      gap: 2em;
+      margin-bottom: 2em;
+    }
+    .game-canvas {
+      flex: 1;
+      border: 3px solid #8B4513;
+      border-radius: 10px;
+      background: #87CEEB;
+    }
+    .game-info {
+      flex: 0 0 300px;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 1em;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .score {
+      font-size: 1.5em;
+      font-weight: bold;
+      margin-bottom: 1em;
+      text-align: center;
+      padding: 1em;
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+      border-radius: 10px;
+      border: 3px solid #FF8C00;
+      color: #8B4513;
+      text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+      box-shadow: 0 4px 12px rgba(255,140,0,0.3);
+    }
+    .score table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .score td {
+      padding: 0.3em 0.5em;
+      border: none;
+    }
+    .score td:first-child {
+      text-align: left;
+      font-weight: normal;
+    }
+    .score td:last-child {
+      text-align: right;
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+    .historique {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 0.9em;
+    }
+    .historique th, .historique td {
+      border: 1px solid #aaa;
+      padding: 0.3em;
+      text-align: center;
+    }
+    .historique th {
+      background: #f0f0f0;
+    }
+    .reset-btn {
+      background: #f44336;
+      margin-top: 1em;
+    }
+    .reset-btn:hover {
+      background: #d32f2f;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>🍎 Jeu du Pommier Itéré 🍎</h1>
+  
+  <div class="game-controls">
+    <p>Choisissez votre action :</p>
+    <button class="share-btn" onclick="jouerUnTour('P')">🤝 Partager</button>
+    <button onclick="jouerUnTour('G')">⚔️ Garder</button>
+    <button class="reset-btn" onclick="resetGame()">🔄 Nouvelle partie</button>
+  </div>
+
+  <div class="game-area">
+    <div id="gameCanvas" class="game-canvas"></div>
+    
+    <div class="game-info">
+      <div class="score">
+        <table id="tableauScores">
+          <tr>
+            <td>Votre score</td>
+            <td id="scoreJoueur">0</td>
+          </tr>
+                      <tr>
+              <td>Score du robot</td>
+              <td id="scoreRobot">0</td>
+            </tr>
+        </table>
+      </div>
+      
+      <table class="historique" id="tableHistorique">
+        <thead>
+          <tr>
+            <th>Tour</th>
+            <th>Vous</th>
+            <th>Robot</th>
+            <th>Points</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Game logic variables
+  const gain = {
+    'PP': [3, 3],
+    'PG': [0, 5],
+    'GP': [5, 0],
+    'GG': [1, 1]
+  };
+
+  let historique = [];
+  let scoreJoueur = 0;
+  let scoreRobot = 0;
+
+  // Physics and graphics variables
+  let app;
+  let engine;
+  let world;
+  let bucketLeft, bucketRight;
+  let apples = [];
+  let bucketBodies = [];
+
+  // Game settings
+  const CANVAS_WIDTH = 800;
+  const CANVAS_HEIGHT = 600;
+  const BUCKET_WIDTH = 180;
+  const BUCKET_HEIGHT = 120;
+  const BUCKET_WALL_THICKNESS = 12;
+  const APPLE_RADIUS = 12;
+
+  // Initialize the game
+  function initGame() {
+    // Create PIXI application
+    app = new PIXI.Application({
+      width: CANVAS_WIDTH,
+      height: CANVAS_HEIGHT,
+      backgroundColor: 0x87CEEB,
+      antialias: true
+    });
+    
+    document.getElementById('gameCanvas').appendChild(app.view);
+
+    // Create Matter.js engine
+    engine = Matter.Engine.create();
+    world = engine.world;
+    engine.world.gravity.y = 0.8;
+
+    // Create buckets
+    createBuckets();
+
+    // Start the physics loop
+    Matter.Engine.run(engine);
+    
+    // Start the render loop
+    app.ticker.add(updatePhysics);
+  }
+
+  function createBuckets() {
+    const bucketY = CANVAS_HEIGHT - BUCKET_HEIGHT - 20;
+    const leftBucketX = 150;
+    const rightBucketX = CANVAS_WIDTH - 150 - BUCKET_WIDTH;
+
+    // Create left bucket
+    bucketLeft = createBucket(leftBucketX, bucketY, 0xFF6B6B); // Red-ish for player
+    
+    // Create right bucket  
+    bucketRight = createBucket(rightBucketX, bucketY, 0x4ECDC4); // Teal for bot
+  }
+
+  function createBucket(x, y, color) {
+    const bucket = new PIXI.Container();
+    
+    // Visual bucket
+    const bucketGraphics = new PIXI.Graphics();
+    bucketGraphics.beginFill(color, 0.8);
+    bucketGraphics.drawRect(0, 0, BUCKET_WIDTH, BUCKET_HEIGHT);
+    bucketGraphics.beginFill(color, 1);
+    // Left wall
+    bucketGraphics.drawRect(0, 0, BUCKET_WALL_THICKNESS, BUCKET_HEIGHT);
+    // Right wall
+    bucketGraphics.drawRect(BUCKET_WIDTH - BUCKET_WALL_THICKNESS, 0, BUCKET_WALL_THICKNESS, BUCKET_HEIGHT);
+    // Bottom
+    bucketGraphics.drawRect(0, BUCKET_HEIGHT - BUCKET_WALL_THICKNESS, BUCKET_WIDTH, BUCKET_WALL_THICKNESS);
+    
+    bucket.addChild(bucketGraphics);
+    bucket.x = x;
+    bucket.y = y;
+    app.stage.addChild(bucket);
+
+    // Physics bodies for bucket walls
+    const leftWall = Matter.Bodies.rectangle(
+      x + BUCKET_WALL_THICKNESS/2, 
+      y + BUCKET_HEIGHT/2, 
+      BUCKET_WALL_THICKNESS, 
+      BUCKET_HEIGHT, 
+      { isStatic: true }
+    );
+    
+    const rightWall = Matter.Bodies.rectangle(
+      x + BUCKET_WIDTH - BUCKET_WALL_THICKNESS/2, 
+      y + BUCKET_HEIGHT/2, 
+      BUCKET_WALL_THICKNESS, 
+      BUCKET_HEIGHT, 
+      { isStatic: true }
+    );
+    
+    const bottom = Matter.Bodies.rectangle(
+      x + BUCKET_WIDTH/2, 
+      y + BUCKET_HEIGHT - BUCKET_WALL_THICKNESS/2, 
+      BUCKET_WIDTH, 
+      BUCKET_WALL_THICKNESS, 
+      { isStatic: true }
+    );
+
+    Matter.World.add(world, [leftWall, rightWall, bottom]);
+    bucketBodies.push(leftWall, rightWall, bottom);
+
+    return bucket;
+  }
+
+  function createApple(x, y, isPlayer) {
+    // Create physics body
+    const body = Matter.Bodies.circle(x, y, APPLE_RADIUS, {
+      restitution: 0.3,
+      friction: 0.8,
+      density: 0.001
+    });
+
+    // Create visual apple
+    const appleGraphics = new PIXI.Graphics();
+    appleGraphics.beginFill(isPlayer ? 0xFF4444 : 0x44FF44); // Red for player, green for bot
+    appleGraphics.drawCircle(0, 0, APPLE_RADIUS);
+    appleGraphics.beginFill(0x8B4513); // Brown stem
+    appleGraphics.drawRect(-1, -APPLE_RADIUS-3, 2, 4);
+    
+    app.stage.addChild(appleGraphics);
+    
+    Matter.World.add(world, body);
+    
+    const apple = {
+      body: body,
+      graphics: appleGraphics,
+      isPlayer: isPlayer
+    };
+    
+    apples.push(apple);
+    return apple;
+  }
+
+  function dropApples(playerPoints, botPoints) {
+    // Drop apples for player
+    for (let i = 0; i < playerPoints; i++) {
+      setTimeout(() => {
+        const x = bucketLeft.x + BUCKET_WIDTH/2 + (Math.random() - 0.5) * 60;
+        const y = -20 - Math.random() * 50;
+        createApple(x, y, true);
+      }, i * 100 + Math.random() * 100);
+    }
+
+    // Drop apples for bot
+    for (let i = 0; i < botPoints; i++) {
+      setTimeout(() => {
+        const x = bucketRight.x + BUCKET_WIDTH/2 + (Math.random() - 0.5) * 60;
+        const y = -20 - Math.random() * 50;
+        createApple(x, y, false);
+      }, i * 100 + Math.random() * 100);
+    }
+  }
+
+  function updatePhysics() {
+    // Update apple positions
+    apples.forEach((apple, index) => {
+      apple.graphics.x = apple.body.position.x;
+      apple.graphics.y = apple.body.position.y;
+      apple.graphics.rotation = apple.body.angle;
+
+      // Remove apples that have fallen too far
+      if (apple.body.position.y > CANVAS_HEIGHT + 100) {
+        app.stage.removeChild(apple.graphics);
+        Matter.World.remove(world, apple.body);
+        apples.splice(index, 1);
+      }
+    });
+  }
+
+  function strategieRobot() {
+    if (historique.length === 0) return 'P'; // Tit for Tat commence par coopérer
+    return historique[historique.length - 1].joueur; // Imite le dernier coup du joueur
+  }
+
+  function jouerUnTour(coupJoueur) {
+    const coupRobot = strategieRobot();
+    const clé = coupJoueur + coupRobot;
+    const [ptsJoueur, ptsRobot] = gain[clé];
+
+    scoreJoueur += ptsJoueur;
+    scoreRobot += ptsRobot;
+
+    historique.push({ 
+      tour: historique.length + 1, 
+      joueur: coupJoueur, 
+      bot: coupRobot, 
+      ptsJoueur, 
+      ptsRobot 
+    });
+
+    // Drop apples based on points earned
+    dropApples(ptsJoueur, ptsRobot);
+
+    mettreAJourInterface();
+  }
+
+  function mettreAJourInterface() {
+    const tableau = document.getElementById("tableHistorique").querySelector("tbody");
+    tableau.innerHTML = "";
+
+    historique.forEach(entree => {
+      const ligne = `<tr>
+        <td>${entree.tour}</td>
+        <td>${entree.joueur === 'P' ? '🤝' : '⚔️'}</td>
+        <td>${entree.bot === 'P' ? '🤝' : '⚔️'}</td>
+        <td>${entree.ptsJoueur}, ${entree.ptsRobot}</td>
+      </tr>`;
+      tableau.innerHTML += ligne;
+    });
+
+    document.getElementById("scoreJoueur").textContent = scoreJoueur;
+    document.getElementById("scoreRobot").textContent = scoreRobot;
+  }
+
+  function resetGame() {
+    // Clear game state
+    historique = [];
+    scoreJoueur = 0;
+    scoreRobot = 0;
+    
+    // Clear apples
+    apples.forEach(apple => {
+      app.stage.removeChild(apple.graphics);
+      Matter.World.remove(world, apple.body);
+    });
+    apples = [];
+    
+    mettreAJourInterface();
+  }
+
+  // Initialize the game when page loads
+  window.addEventListener('load', initGame);
+</script>
+
+</body>
+</html>
