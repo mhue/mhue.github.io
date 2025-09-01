@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🍎 Jeu des pommes 🍏</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #fff8e1 0%, #f3e5ab 100%);
+      padding: 2em;
+      max-width: 1200px;
+      margin: auto;
+      color: #3e2f1c;
+      min-height: 100vh;
+    }
+    
+    h1 {
+      text-align: center;
+      font-size: 2.5em;
+      margin-bottom: 1em;
+      color: #4e342e;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .intro {
+      background: rgba(255,255,255,0.9);
+      border-radius: 15px;
+      padding: 2em;
+      margin-bottom: 2em;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+      font-size: 1.1em;
+      line-height: 1.6;
+    }
+    
+    .pages-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1.5em;
+      margin-top: 2em;
+    }
+    
+    .page-card {
+      background: rgba(255,255,255,0.95);
+      border-radius: 15px;
+      padding: 1.5em;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border: 2px solid #8d6e63;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .page-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    
+    .page-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #4caf50, #ffeb3b, #ff5722);
+    }
+    
+    .page-title {
+      font-size: 1.4em;
+      font-weight: bold;
+      color: #4e342e;
+      margin-bottom: 0.5em;
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+    }
+    
+    .page-emoji {
+      font-size: 1.5em;
+    }
+    
+    .page-description {
+      color: #5d4037;
+      line-height: 1.5;
+      margin-bottom: 1em;
+    }
+    
+    .page-link {
+      display: inline-block;
+      background: #4caf50;
+      color: white;
+      padding: 0.7em 1.5em;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background 0.3s ease;
+      margin-top: 0.5em;
+    }
+    
+    .page-link:hover {
+      background: #45a049;
+    }
+    
+    .category-header {
+      grid-column: 1 / -1;
+      text-align: center;
+      margin: 2em 0 1em 0;
+      font-size: 1.8em;
+      color: #4e342e;
+      font-weight: bold;
+      position: relative;
+    }
+    
+    .category-header::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 3px;
+      background: linear-gradient(90deg, #4caf50, #ffeb3b);
+      border-radius: 2px;
+    }
+    
+    .special-card {
+      background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+      border-color: #4caf50;
+    }
+    
+    .theory-card {
+      background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+      border-color: #ff9800;
+    }
+    
+    .interactive-card {
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      border-color: #2196f3;
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        padding: 1em;
+      }
+      
+      h1 {
+        font-size: 2em;
+      }
+      
+      .pages-grid {
+        grid-template-columns: 1fr;
+        gap: 1em;
+      }
+      
+      .page-card {
+        padding: 1em;
+      }
+      
+      .category-header {
+        font-size: 1.5em;
+        margin: 1.5em 0 0.5em 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<h1>🍎 Jeu des pommes 🍏</h1>
+
+
+
+<div class="pages-grid">
+  
+  <div class="category-header">🎮 Pages Interactives</div>
+  
+  <div class="page-card interactive-card">
+    <div class="page-title">
+      <span class="page-emoji">🍎</span>
+      Jeu du Pommier Itéré (Version Complète)
+    </div>
+    <div class="page-description">
+      Une expérience de jeu immersive avec animations physiques en 2D. Jouez contre un robot utilisant la stratégie "Tit for Tat" et regardez les pommes tomber dans des paniers selon vos choix. Interface responsive avec effets visuels avancés utilisant Matter.js et PIXI.js.
+    </div>
+    <a href="dilemme-pommes.html" class="page-link">🎯 Jouer maintenant</a>
+  </div>
+  
+  <div class="page-card interactive-card">
+    <div class="page-title">
+      <span class="page-emoji">🌱</span>
+      Jeu du Pommier Itéré (Version Simple)
+    </div>
+    <div class="page-description">
+      Version épurée du jeu du dilemme du prisonnier. Interface minimaliste pour se concentrer sur la stratégie pure. Parfait pour comprendre les mécaniques de base du jeu itéré avec un robot qui imite vos derniers coups.
+    </div>
+    <a href="dilemme.html" class="page-link">🎮 Version simple</a>
+  </div>
+  
+
+  
+  <div class="category-header">📊 Analyses et Comparaisons</div>
+  
+
+  <div class="page-card interactive-card">
+    <div class="page-title">
+      <span class="page-emoji">⏱️</span>
+      Tournoi Progressif
+    </div>
+    <div class="page-description">
+      Tournoi round-robin contrôlable avec durée personnalisable ! Définissez la durée du tournoi (5-300 secondes), démarrez, mettez en pause ou redémarrez à volonté. Visualisation en temps réel avec barres de progression et contrôles avancés.
+    </div>
+    <a href="pommes/progress.html" class="page-link">⚡ Contrôler le tournoi</a>
+  </div>
+  
+  <div class="page-card interactive-card">
+    <div class="page-title">
+      <span class="page-emoji">🔄</span>
+      Round Robin Visuel
+    </div>
+    <div class="page-description">
+      Animation géométrique hypnotique montrant comment s'organise un tournoi round-robin. Visualisation circulaire avec des joueurs représentés par des emojis, parfait pour comprendre la structure des tournois équitables.
+    </div>
+    <a href="pommes/round-robin.html" class="page-link">🎨 Voir l'animation</a>
+  </div>
+  
+  <div class="category-header">📚 Documentation et Références</div>
+  
+  <div class="page-card theory-card">
+    <div class="page-title">
+      <span class="page-emoji">👥</span>
+      Profils des Stratégies
+    </div>
+    <div class="page-description">
+      Guide complet des 12 profils de joueurs avec leurs stratégies détaillées. De la "Gentille" qui coopère toujours à la "Rancunière" qui ne pardonne jamais, découvrez toutes les personnalités du jeu et leurs comportements uniques.
+    </div>
+    <a href="pommes/profils.html" class="page-link">📖 Lire les profils</a>
+  </div>
+  
+  <div class="page-card theory-card">
+    <div class="page-title">
+      <span class="page-emoji">🃏</span>
+      Cartes des Profils (PDF)
+    </div>
+    <div class="page-description">
+      Version imprimable des profils sous forme de cartes élégantes. Format A4 optimisé pour l'impression, chaque stratégie sur sa propre page avec un design soigné. Parfait pour les activités pédagogiques ou les jeux de société.
+    </div>
+    <a href="pommes/cartes-profils-pdf.html" class="page-link">🖨️ Imprimer les cartes</a>
+  </div>
+  
+  <div class="page-card theory-card">
+    <div class="page-title">
+      <span class="page-emoji">🌳</span>
+      Le Pommier Magique (Histoire)
+    </div>
+    <div class="page-description">
+      L'histoire originale qui explique les règles du jeu à travers le conte d'Alice et Basile découvrant un pommier magique. Présentation narrative parfaite pour introduire le concept du dilemme du prisonnier aux enfants.
+    </div>
+    <a href="pommes/pommier.html" class="page-link">📚 Lire l'histoire</a>
+  </div>
+
+</div>
+
+<div style="text-align: center; margin-top: 3em; padding: 2em; background: rgba(255,255,255,0.8); border-radius: 15px;">
+  <p><strong>Explorez cette collection de jeux interactifs basés sur le dilemme du prisonnier.</strong> Chaque page offre une perspective unique sur la coopération et la compétition à travers le "jeu des pommes".</p>
+  <p><em>Expérimentez et découvrez les subtilités de la coopération !</em></p>
+</div>
+
+</body>
+</html>
